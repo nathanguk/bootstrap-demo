@@ -112,7 +112,7 @@
                 "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
                     "<powershell>\n",
                     "mkdir -Path C:\\ANS \n",
-                    "Invoke-RestMethod -Uri https://raw.githubusercontent.com/nathanguk/bootstrap-demo/master/script.ps1 -OutFile C:\\ANS\\script.ps1 \n",
+                    "Invoke-RestMethod -Uri https://raw.githubusercontent.com/nathanguk/bootstrap-demo/master/PowerShell/script.ps1 -OutFile C:\\ANS\\script.ps1 \n",
                     "Invoke-Expression 'C:\\ANS\\script.ps1 -Parameter1 ", {"Ref": "Parameter1"}, " -Parameter2 ", {"Ref": "Parameter2"},"' \n",
                     "</powershell>"
                     ]]}
