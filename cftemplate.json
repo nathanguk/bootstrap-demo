@@ -5,7 +5,7 @@
 	
 	"Parameters": {
         "VPC": {
-			"Description": "VPC to Deploy Collectors",
+			"Description": "VPC to Instance",
 			"Type" : "AWS::EC2::VPC::Id"
         },
 		"SubnetA": {
@@ -13,16 +13,16 @@
 			"Type" : "AWS::EC2::Subnet::Id"
         },
         "InstanceKey": {
-			"Description": "EC2 Instance Key Pair for Collector Instances",
+			"Description": "EC2 Instance Key Pair",
             "Type" : "AWS::EC2::KeyPair::KeyName"
         },
         "InstanceType": {
-			"Description": "Instance Type for Collector Instances",
+			"Description": "Instance Type",
             "Type" : "String",
             "Default" : "t2.small",
             "AllowedValues" : ["t2.small", "t2.medium", "t2.xlarge"]
         },
-        "InstanceAMI": {
+        "ImageID": {
             "Description": "Instance AMI",
             "Type" : "String",
             "Default" : "ami-9c6b8dfb"
@@ -32,9 +32,8 @@
             "Type" : "String"
         },
         "Parameter2": {
-			"Description": "Parameter1",
-            "Type" : "String",
-            "Default" : "ami-403e2524"
+			"Description": "Parameter2",
+            "Type" : "String"
         }
 	},
 
@@ -58,11 +57,11 @@
 			"Type": "AWS::EC2::SecurityGroupIngress",
 			"DependsOn": "ProdSG",
 			"Properties": {
-				"GroupId": { "Ref" : "ProdSG" },
-				"IpProtocol": "-1",
-				"FromPort": "-1",
-				"ToPort": "-1",
-				"SourceSecurityGroupId": { "Ref" : "ProdSG" }
+                "GroupId": { "Ref" : "ProdSG" },
+                "IpProtocol": "tcp",
+                "CidrIp": "0.0.0.0/0",
+				"FromPort": "3389",
+				"ToPort": "3389"
 			}
         },
 
@@ -89,42 +88,34 @@
                     "DeviceIndex" : "0"
                 }],
                "Tags": [
-                {
-                    "Key": "Name",
-                    "Value": "Windows"
-                },
-                {
-                    "Key": "Application Name",
-                    "Value": "Test Application"
-                },
-                {
-                    "Key" : "Criticality",
-                    "Value" : "Tier 2"
-                },
-                {
-                    "Key" : "Environment",
-                    "Value" : "Prod"
-                },
-                {
-                    "Key" : "Owner",
-                    "Value" : "ANS"
-                }],
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "", [
-                                "#!/bin/bash \n",
-                                "yum update -y \n",
-                                "yum search python35 \n",
-                                "yum install python35-virtualenv -y \n",
-                                "yum install python-pip -y \n",
-                                "alternatives --set python /usr/bin/python3.5 \n",
-                                "pip install requests \n",
-                                "wget https://raw.githubusercontent.com/ans-cloud/aws/master/LogicMonitor-Collector-PublicIP/CreateLMCollector.py \n",
-                                "python CreateLMCollector.py '",{"Ref": "accessId"},"' '",{"Ref": "accessKey"},"' '",{"Ref": "collectorSize"},"' '",{"Ref": "lmHost"},"' '",{"Ref": "SostenutoId"},"'"
-                            ]
-                        ]
+                    {
+                        "Key": "Name",
+                        "Value": "Windows"
+                    },
+                    {
+                        "Key": "Application Name",
+                        "Value": "Test Application"
+                    },
+                    {
+                        "Key" : "Criticality",
+                        "Value" : "Tier 2"
+                    },
+                    {
+                        "Key" : "Environment",
+                        "Value" : "Prod"
+                    },
+                    {
+                        "Key" : "Owner",
+                        "Value" : "ANS"
                     }
+                ],
+                "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
+                    "<powershell>\n",
+                    "mkdir -Path C:\\ANS \n",
+                    "Invoke-RestMethod -Uri https://raw.githubusercontent.com/nathanguk/bootstrap-demo/master/script.ps1 -OutFile C:\\ANS\\script.ps1 \n",
+                    "Invoke-Expression C:\\ANS\\script.ps1 -Parameter1 ", {"Ref": "Parameter1"}, " -Parameter2 ", {"Ref": "Parameter2"}," \n",
+                    "</powershell>"
+                    ]]}
                 }
             }
         }
