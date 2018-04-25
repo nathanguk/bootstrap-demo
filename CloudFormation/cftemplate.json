@@ -93,7 +93,7 @@
                         "Value": "Windows"
                     },
                     {
-                        "Key": "Application Name",
+                        "Key": "Application_Name",
                         "Value": "Test Application"
                     },
                     {
